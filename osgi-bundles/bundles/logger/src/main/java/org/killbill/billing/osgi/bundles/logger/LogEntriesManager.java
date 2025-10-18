@@ -2,7 +2,7 @@
  * Copyright 2010-2014 Ning, Inc.
  * Copyright 2014-2020 Groupon, Inc
  * Copyright 2020-2020 Equinix, Inc
- * Copyright 2014-2020 The Billing Project, LLC
+ * Copyright 2014-2025 The Billing Project, LLC
  *
  * The Billing Project licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -97,16 +97,22 @@ public class LogEntriesManager implements Closeable {
 
     public void unsubscribe(final UUID cacheId) {
         final EvictingQueue<LogEntryJson> cache;
+        final int active;
         synchronized (sseIDsCaches) {
             cache = sseIDsCaches.remove(cacheId);
+            active = sseIDsCaches.size();
         }
         // Logging should be done outside the synchronized block to avoid any deadlock (the log entry will be put in the caches)
-        logger.info("Removed cache {} ({} active)", cacheId, sseIDsCaches.size());
-        cache.clear();
+        if (cache != null) {
+            logger.info("Removed cache {} ({} active)", cacheId, active);
+            cache.clear();
+        } else {
+            logger.debug("Cache {} already removed ({} active)", cacheId, active);
+        }
     }
 
     public Iterable<LogEntryJson> drain(final UUID cacheId) {
-        final Collection<LogEntryJson> elements = new LinkedList<LogEntryJson>();
+        final Collection<LogEntryJson> elements = new LinkedList<>();
 
         synchronized (sseIDsCaches) {
             final EvictingQueue<LogEntryJson> logEntries = sseIDsCaches.get(cacheId);

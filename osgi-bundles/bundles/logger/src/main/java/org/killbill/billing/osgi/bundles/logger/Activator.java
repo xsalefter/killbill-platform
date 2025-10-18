@@ -38,7 +38,7 @@ public class Activator extends KillbillActivatorBase {
     public static final String PLUGIN_NAME = "killbill-osgi-logger";
 
     private LogEntriesManager logEntriesManager;
-    private LogsSseHandler logsSseHandler;
+    private EnhancedSseHandler logsSseHandler;
     private KillbillLogWriter killbillLogListener;
     private KillbillLoggerFactory loggerFactory;
 
@@ -58,7 +58,7 @@ public class Activator extends KillbillActivatorBase {
         registrar = new OSGIKillbillRegistrar();
 
         final PluginApp pluginApp = new PluginAppBuilder(PLUGIN_NAME).build();
-        logsSseHandler = new LogsSseHandler(logEntriesManager);
+        logsSseHandler = new EnhancedSseHandler(logEntriesManager);
         pluginApp.sse("/", logsSseHandler);
         final HttpServlet httpServlet = PluginApp.createServlet(pluginApp);
         registerServlet(context, httpServlet);
